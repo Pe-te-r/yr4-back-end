@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token
+from app import jwt
 from app.db.models import User
 from app.util import send_email,validate_data
 
@@ -46,6 +46,6 @@ class Login(Resource):
             return {'status':'error','message': 'id number not correct'}
         if email_exits.code.code != correct['otp']:
             return {'status':'error','message':'verification code not correct','error':{'code':False}}
-        token=create_access_token(identity=email_exits.email)
+        token=jwt.create_access_token(identity=email_exits.email)
         return {'status':'success','message':'login was success','data':{'token':token}}
         

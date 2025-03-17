@@ -1,9 +1,11 @@
 from flask_restful import Resource
 from app.db.models import User
+from app import jwt
 
     
 
 class UsersResource(Resource):
+    method_decorators=[jwt.jwt_required]
     def get(self):
         try:
             users=User.get_all()

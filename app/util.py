@@ -1,6 +1,7 @@
 from flask import render_template
 from flask_mail import Message
-from app import mail
+
+from app import mail_
 
 def send_email(to, subject, template, **kwargs):
     """
@@ -23,7 +24,7 @@ def send_email(to, subject, template, **kwargs):
         )
 
         # Send the email
-        with mail.connect() as conn:
+        with mail_.connect() as conn:
             conn.send(msg)
         print(f"Email sent to {to}")
         return True
@@ -49,4 +50,6 @@ def validate_data(data,valid,optional=None):
             data_[key]=value
     
     return len(missing_field)<=0,missing_field,data_
+
+
 
