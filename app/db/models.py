@@ -55,16 +55,12 @@ class User(db.Model):
             user_id = uuid.UUID(id)
         except ValueError:
             # Handle invalid UUID format
-            print(f"Invalid UUID format: {id}")
             return None
         try:
-            print(id)
             user= cls.query.filter(cls.id==user_id).first()
-            print(user)
             return user
 
         except Exception as e:
-            print(e)
             return False
     @classmethod
     def get_by_id_number(cls,id):
