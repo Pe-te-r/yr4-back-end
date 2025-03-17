@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_mail import Mail
 from flask_restful import Api
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 from config import Config
 from app.db.models import db
 
@@ -15,6 +16,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
     mail.init_app(app)
+    JWTManager(app)
     CORS(app, supports_credentials=True)  # Enable CORS for all routes
     
     
