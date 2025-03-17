@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 import uuid
 from enum import Enum
+from random import randint
 
 
 db = SQLAlchemy()
@@ -37,6 +38,10 @@ class User(db.Model):
             'id_number':self.id_number,
             'firstname':self.firstname,
         }
+    
+    @classmethod
+    def get_by_email(cls,email):
+        return cls.query.filter(cls.email==email).first()
         
     @classmethod
     def get_by_id(cls,id):
@@ -56,10 +61,30 @@ class User(db.Model):
         except Exception as e:
             print(e)
             return False
+    @classmethod
+    def get_by_id_number(cls,id):
+        return cls.query.filter(cls.id_number==id).first()
     
     @classmethod
     def get_all(cls):
         return cls.query.all()
+    
+    @classmethod 
+    def create_user(cls,user):
+        try:
+            new_user =cls(id=uuid.uuid4(),firstname=user['firstname'],email=user['email'],id_type=IDType(user['id_type']),contact=user['contact'],id_number=user['id_number'])
+            db.session.add(new_user)
+            db.session.flush()
+            new_code=Code(user_id=new_user.id,code=Code.random_())
+            db.session.add(new_code)
+            db.session.commit()
+            db.session.refresh(new_user)
+            return new_user
+        except Exception as e:
+            print(e)
+            print('above')
+            db.session.rollback()
+            return False
 
 class Code(db.Model):
     __tablename__ = 'codes'
@@ -68,3 +93,7 @@ class Code(db.Model):
 
     def __repr__(self):
         return f'<Code {self.code}>'
+
+    @staticmethod
+    def random_():
+        return ''.join(str(randint(0, 9)) for _ in range(4))
