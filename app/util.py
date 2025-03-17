@@ -30,3 +30,23 @@ def send_email(to, subject, template, **kwargs):
     except Exception as e:
         print(f"Failed to send email: {e}")
         return False
+
+
+def validate_data(data,valid,optional=None):
+    missing_field=[]
+    correct_field=[]
+    for value in valid:
+        if value not in data:
+            missing_field.append(value)
+        else:
+            correct_field.append({value:data[value]})
+    if optional:
+        if optional in data:
+            correct_field.append({optional:data[optional]})
+    data_={}
+    for field in correct_field:
+        for key,value in field.items():
+            data_[key]=value
+    
+    return len(missing_field)<=0,missing_field,data_
+
