@@ -38,6 +38,11 @@ class User(db.Model):
             'id_number':self.id_number,
             'firstname':self.firstname,
         }
+   
+    def change_code(self):
+       self.code.code=Code.random_()
+       db.session.add(self.code)
+       db.session.commit()
     
     @classmethod
     def get_by_email(cls,email):
