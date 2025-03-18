@@ -73,7 +73,7 @@ class User(db.Model):
     @classmethod 
     def create_user(cls,user):
         try:
-            new_user =cls(id=uuid.uuid4(),firstname=user['firstname'],email=user['email'],id_type=IDType(user['id_type']),contact=user['contact'],id_number=user['id_number'])
+            new_user =cls(id=uuid.uuid4(),firstname=user['firstname'],email=user['email'],id_type=IDType(user['idType']),contact=user['contact'],id_number=user['id_number'])
             db.session.add(new_user)
             db.session.flush()
             new_code=Code(user_id=new_user.id,code=Code.random_())

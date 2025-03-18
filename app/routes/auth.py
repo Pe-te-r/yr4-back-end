@@ -10,7 +10,7 @@ class Register(Resource):
             data=request.get_json()
             if not data:
                 return {"status": "error", "message": "No data provided"}, 400 
-            required_field=['firstname','email','contact','id_number','id_type']
+            required_field=['firstname','email','contact','id_number','idType']
             is_valid,missing,correct=validate_data(data,required_field,optional='role')
 
             if not is_valid:

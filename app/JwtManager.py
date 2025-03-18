@@ -1,65 +1,69 @@
-from flask import  request, jsonify
-from functools import wraps
 import jwt
-import datetime
+from functools import wraps
+from flask import request, abort,g
+from datetime import timedelta,datetime
+
+class ExpiredTokenError(Exception):
+    pass
+class InvalidTokenError(Exception):
+    pass
 
 class CustomJWT:
     def __init__(self, app=None):
-        self.app = app
+        self.secret_key = "your_jwt_secret_key"
+        self.algorithms = "HS256" 
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app):
-        """
-        Initialize the JWT extension with the Flask app.
-        """
-        self.app = app
-        self.app.config.setdefault('JWT_SECRET_KEY', 'your-secret-key')  # Default secret key
-        self.app.config.setdefault('JWT_ALGORITHM', 'HS256')  # Default algorithm
-        self.app.config.setdefault('JWT_EXPIRATION_DELTA', datetime.timedelta(hours=1))  # Default expiration
+        self.secret_key = app.config.get("JWT_SECRET_KEY", "default_secret_key")
+        self.expiration_time = app.config.get("JWT_ACCESS_TOKEN_EXPIRES", timedelta(minutes=15))  # Default: 15 minutes
 
-    def create_access_token(self, identity):
-        """
-        Create a JWT token for the given identity (e.g., user ID or username).
-        """
+    def create_access_token(self, identity, expires_delta=None):
+        if expires_delta is None:
+            expires_delta = self.expiration_time
+        
+        exp = datetime.utcnow() + expires_delta
         payload = {
-            'identity': identity,
-            'exp': datetime.datetime.utcnow() + self.app.config['JWT_EXPIRATION_DELTA']
+            "identity": identity,
+            "iat": datetime.utcnow(),  
+            "exp": exp  
         }
-        token = jwt.encode(payload, self.app.config['JWT_SECRET_KEY'], algorithm=self.app.config['JWT_ALGORITHM'])
-        return token
-
-    def validate_token(self, token):
-        """
-        Validate a JWT token and return the payload if valid.
-        """
+        return jwt.encode(payload, self.secret_key, algorithm=self.algorithms)
+    def decode_access_token( self,token):
         try:
-            payload = jwt.decode(token, self.app.config['JWT_SECRET_KEY'], algorithms=[self.app.config['JWT_ALGORITHM']])
-            return payload
+            decoded_token = jwt.decode(token, self.secret_key, algorithms=[self.algorithms])
+            return decoded_token
         except jwt.ExpiredSignatureError:
-            return None  # Token has expired
+            raise ExpiredTokenError("Expired token.")
         except jwt.InvalidTokenError:
-            return None  # Token is invalid
+            raise InvalidTokenError("Invalid token.")
 
-    def jwt_required(self, f):
-        """
-        Decorator to ensure a valid JWT token is present in the request.
-        """
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            token = request.headers.get('Authorization')
+    def jwt_required(self,func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            token = self.get_token_from_request()
             if not token:
-                return jsonify({"message": "Token is missing"}), 401
+                abort(401, description="Missing token.")
 
-            # Remove 'Bearer ' prefix if present
-            if token.startswith('Bearer '):
-                token = token[7:]
+            try:
+                decoded_token = self.decode_access_token(token)
+                g.user = decoded_token.get("identity")
+            except ExpiredTokenError as e:
+                abort(401, description=str(e))
+            except InvalidTokenError as e:
+                abort(403, description=str(e))
+            except Exception :
+                abort(500, description="An internal error occurred.")
 
-            payload = self.validate_token(token)
-            if not payload:
-                return jsonify({"message": "Invalid or expired token"}), 401
+            return func(*args, **kwargs)
 
-            # Attach the payload to the request for use in the route
-            request.current_user = payload
-            return f(*args, **kwargs)
-        return decorated_function
+        return wrapper
+
+    def get_token_from_request(self):
+        auth_header = request.headers.get("Authorization", None)
+        if auth_header:
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                return parts[1]
+        return None
