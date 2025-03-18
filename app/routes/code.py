@@ -16,7 +16,8 @@ class CodesResource(Resource):
         
         return {'status':'error','message':'id not provided'}
     
-    def post(self,id=None):
+    def post(self):
+        
         data=request.get_json()
         
         is_valid,missing_field,valid_field=validate_data(data,['email'])
@@ -27,7 +28,7 @@ class CodesResource(Resource):
             user_exits.change_code()
         
             if send_email(user_exits.email,'Verification Code','code.html',username=user_exits.firstname,code=user_exits.code.code):
-                return {'status':'success','message':'email sent successful'},200
+                return {'status':'success','message':'Verification code sent to email'},200
             
             return {'status':'error','message':'code not sent try again'},304
         return {'status':'error','message':'missing field required','error':{'field':missing_field}}
