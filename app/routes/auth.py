@@ -43,9 +43,9 @@ class Login(Resource):
         if not email_exits:
             return {'status':'error','message':'Email not found exits'},400
         if email_exits.id_number != correct['id_number']:
-            return {'status':'error','message': 'id number not correct'}
+            return {'status':'error','message': 'id number not correct'},404
         if email_exits.code.code != correct['otp']:
-            return {'status':'error','message':'verification code not correct','error':{'code':False}}
+            return {'status':'error','message':'verification code not correct','error':{'code':False}},400
         token=jwt.create_access_token(identity=email_exits.email)
-        return {'status':'success','message':'login was success','data':{'token':token}}
+        return {'status':'success','message':'login was success','data':{'token':token}},200
         

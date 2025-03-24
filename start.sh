@@ -1,2 +1,2 @@
 #!/bin/bash
-uvicorn main:asgi_app --host 192.168.0.112 --port 8000 --reload
+uvicorn main:asgi_app --host 0.0.0.0 --port 8000 --reload
