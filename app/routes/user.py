@@ -21,8 +21,12 @@ class UsersResource(Resource):
         
 
 class UserResource(Resource):
+    method_decorators=[jwt.jwt_required]
     def get(self,id):
         user=User.get_by_id(id)
-        print(user)
-        return 'success'
+        if not user:
+            {'status':'error','message':'user not found'}
+        
+        return {'status':'success','message':'user retrived success','data':user.to_json()}
+
 
