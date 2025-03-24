@@ -47,5 +47,5 @@ class Login(Resource):
         if email_exits.code.code != correct['otp']:
             return {'status':'error','message':'verification code not correct','error':{'code':False}},400
         token=jwt.create_access_token(identity=email_exits.email)
-        return {'status':'success','message':'login was success','data':{'token':token}},200
+        return {'status':'success','message':'login was success','data':{'token':token,'id':str(email_exits.id),'role':email_exits.role.value}},200
         
