@@ -25,8 +25,8 @@ class UserResource(Resource):
     def get(self,id):
         user=User.get_by_id(id)
         if not user:
-            {'status':'error','message':'user not found'}
+            {'status':'error','message':'user not found'},404
         
-        return {'status':'success','message':'user retrived success','data':user.to_json()}
+        return {'status':'success','message':'user retrived success','data':user.to_json()},200
 
 
