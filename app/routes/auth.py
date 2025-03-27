@@ -31,6 +31,7 @@ class Register(Resource):
 class Login(Resource):
     def post(self):
         data=request.get_json()
+        print(data)
         if not data:
             return {"status": "error", "message": "No data provided"}, 400 
         required_field=['email','id_number','otp']
@@ -47,5 +48,6 @@ class Login(Resource):
         if email_exits.code.code != correct['otp']:
             return {'status':'error','message':'verification code not correct','error':{'code':False}},400
         token=jwt.create_access_token(identity=email_exits.email)
+        print(token)
         return {'status':'success','message':'login was success','data':{'token':token,'id':str(email_exits.id),'role':email_exits.role.value}},200
         
