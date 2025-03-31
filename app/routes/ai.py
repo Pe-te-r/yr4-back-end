@@ -7,7 +7,7 @@ from google import genai
 
 def askQuestion(question):
 
-    client = genai.Client(api_key='AIzaSyD5UxMPYl_DLD9D7py6ktK4zGbvnKBvZFo')
+    client = genai.Client(api_key=None)
 
     response = client.models.generate_content(
         model="gemini-2.0-flash",
