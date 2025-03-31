@@ -1,5 +1,6 @@
 from flask_restful import Resource
-
+from flask import request
+from app.util import validate_data
 
 
 from google import genai
@@ -10,7 +11,7 @@ def askQuestion(question):
 
     response = client.models.generate_content(
         model="gemini-2.0-flash",
-        contents=["How does AI work?"])
+        contents=[question])
     return response.text
 
 
@@ -24,6 +25,9 @@ class Ai(Resource):
 
         if not is_valid:
             return {'status':'error','message':'required field missing','error':{'field':[miss for miss in missing]}},400
+        answer=askQuestion(correct['query'])
+        print(answer)
+        return {'status':'success','message':'response was brought','data':answer}
     
 
     def get(self):
