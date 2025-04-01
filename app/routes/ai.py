@@ -2,12 +2,13 @@ from flask_restful import Resource
 from flask import request
 from app.util import validate_data
 
+from os import getenv
 
 from google import genai
 
 def askQuestion(question):
 
-    client = genai.Client(api_key=None)
+    client = genai.Client(api_key=getenv('API_KEY'))
 
     response = client.models.generate_content(
         model="gemini-2.0-flash",
@@ -18,6 +19,7 @@ def askQuestion(question):
 class Ai(Resource):
     def post(self):
         data=request.get_json()
+        print(data)
         if not data:
             return {"status": "error", "message": "No data provided"}, 400 
         required_field=['query']
